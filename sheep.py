@@ -17,17 +17,22 @@ class Sheep:
 
     def __str__(self) -> str:
         # For nicer printing
-        return f"🐑 [ID: {self.id:03d}] [X: {self.x:+.5f}, Y: {self.y:+.5f}]"
+        ok = "☠️"
+        if self.alive:
+            ok = "✔️"
 
-    def move(self):
-        # Choose a random direction and move (much intelligence)
-        direction = random.choice(['u', 'd', 'l', 'r'])
-        match direction:
-            case 'u':
-                self.y += Sheep.movement_distance
-            case 'd':
-                self.y -= Sheep.movement_distance
-            case 'l':
-                self.x -= Sheep.movement_distance
-            case 'r':
-                self.x += Sheep.movement_distance
+        return f"🐑{ok} [ID: {self.id:03d}] [X: {self.x:+.5f}, Y: {self.y:+.5f}]"
+
+    def move(self) -> None:
+        if self.alive:
+            # Choose a random direction and move (much intelligence)
+            direction = random.choice(['u', 'd', 'l', 'r'])
+            match direction:
+                case 'u':
+                    self.y += Sheep.movement_distance
+                case 'd':
+                    self.y -= Sheep.movement_distance
+                case 'l':
+                    self.x -= Sheep.movement_distance
+                case 'r':
+                    self.x += Sheep.movement_distance

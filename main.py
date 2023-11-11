@@ -1,4 +1,5 @@
 from sheep import Sheep
+from wolf import Wolf
 
 WELCOME_STRING = r"""
  ____   _                                           _         _    _               
@@ -13,10 +14,21 @@ By Tomasz Kowalczyk & Jakub Kalinowski
 
 def main():
     print(WELCOME_STRING)
-    sheep = Sheep()
-    print(sheep)
-    sheep.move()
-    print(sheep)
+    sheep_list = [Sheep(), Sheep(), Sheep()]
+    wolf = Wolf()
+    for sheep in sheep_list:
+        print(sheep)
+    print(wolf)
+
+    for sheep in sheep_list:
+        sheep.move()
+    killed_sheep = wolf.move(sheep_list)
+
+    for sheep in sheep_list:
+        print(sheep)
+    print(wolf)
+    if killed_sheep is not None:
+        print(f"Wolf killed sheep {killed_sheep.id}")
 
 
 if __name__ == '__main__':
