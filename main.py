@@ -14,9 +14,7 @@ By Tomasz Kowalczyk & Jakub Kalinowski
 def main():
     print(WELCOME_STRING)
     field = Field()
-    print(field)
-    field.simulate_round()
-    print(field)
+    field.run_simulation()
 
 
 if __name__ == '__main__':

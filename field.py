@@ -16,7 +16,7 @@ class Field:
     round_len = 2
 
     def __init__(self):
-        self.round_no = 0
+        self.rounds_simulated = 0
         self.sheep_killed_this_round: Sheep | None = None
         self.wolf = Wolf()
         self.sheep: List[Sheep] = []
@@ -25,15 +25,23 @@ class Field:
         for i in range(Field.initial_sheep_count):
             self.sheep.append(Sheep())
 
-    def get_alive_sheep(self):
+    def get_alive_sheep(self) -> int:
         return len([True for sheep in self.sheep if sheep.alive])
 
-    def simulate_round(self) -> int:
+    def simulate_round(self) -> None:
         for sheep in self.sheep:
             sheep.move()
-        self.wolf.move(self.sheep)
-        self.round_no += 1
-        return self.get_alive_sheep()
+        self.sheep_killed_this_round = self.wolf.move(self.sheep)
+        self.rounds_simulated += 1
+
+    def run_simulation(self) -> None:
+        while self.rounds_simulated < Field.max_round and self.get_alive_sheep() > 0:
+            self.simulate_round()
+            print(self)
+        if self.get_alive_sheep() > 0:
+            print(f"[🐑😀] SIMULATION ENDED AFTER {self.rounds_simulated} ROUNDS. SHEEP ALIVE: {self.get_alive_sheep()}")
+        else:
+            print(f"[🐑☠️] SIMULATION ENDED AFTER {self.rounds_simulated} ROUNDS. ALL SHEEP WERE KILLED.")
 
     def __str__(self) -> str:
         chased_sheep = ""
@@ -42,5 +50,5 @@ class Field:
         killed_sheep = ""
         if self.sheep_killed_this_round is not None:
             killed_sheep = f" [🐑☠️: {self.sheep_killed_this_round.id:0{Sheep.sheep_id_len}d}]"
-        return (f"[⏱: {self.round_no:0{Field.round_len}d}] [🐺 X: {self.wolf.x:+.5f}, Y: {self.wolf.y:+.5f}] "
+        return (f"[⏱: {self.rounds_simulated:0{Field.round_len}d}] [🐺 X: {self.wolf.x:+.5f}, Y: {self.wolf.y:+.5f}] "
                 f"[🐑✔️: {self.get_alive_sheep():0{Field.sheep_count_len}d}]{chased_sheep}{killed_sheep}")
