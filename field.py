@@ -1,5 +1,6 @@
 import csv
 import json
+import os
 from typing import List
 
 from sheep import Sheep
@@ -11,6 +12,7 @@ class Field:
     sheep_count_len = 2
     max_round = 50
     round_len = 2
+    wait_between_rounds = False
     json_filename = "pos.json"
     csv_filename = "alive.csv"
 
@@ -47,6 +49,8 @@ class Field:
             print(self)
             self.save_field_state_to_json_state()
             self.csv_sheep_counts.append(self.get_alive_sheep())
+            if Field.wait_between_rounds:
+                input("Press ENTER to continue...")
 
         # Display cause of ending simulation
         if self.get_alive_sheep() > 0:
