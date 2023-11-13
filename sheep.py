@@ -7,10 +7,12 @@ class Sheep:
     max_init_coord = 10.0
     movement_distance = 0.5
     current_sheep_id = 0
+    sheep_id_len = 1
 
     def __init__(self):
         self.id = Sheep.current_sheep_id
         self.alive = True
+        Sheep.sheep_id_len = len(str(Sheep.current_sheep_id))
         Sheep.current_sheep_id += 1
         self.x = uniform(-Sheep.max_init_coord, Sheep.max_init_coord)
         self.y = uniform(-Sheep.max_init_coord, Sheep.max_init_coord)
@@ -21,7 +23,7 @@ class Sheep:
         if self.alive:
             ok = "✔️"
 
-        return f"🐑{ok} [ID: {self.id:03d}] [X: {self.x:+.5f}, Y: {self.y:+.5f}]"
+        return f"🐑{ok} [ID: {self.id:0{Sheep.sheep_id_len}d}] [X: {self.x:+.5f}, Y: {self.y:+.5f}]"
 
     def move(self) -> None:
         if self.alive:

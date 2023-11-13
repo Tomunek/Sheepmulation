@@ -17,7 +17,7 @@ class Wolf:
         # For nicer printing
         chased_sheep = ""
         if self.currently_chased_sheep is not None:
-            chased_sheep = (f" [🔪: {self.currently_chased_sheep.id:03d},"
+            chased_sheep = (f" [➡️🐑: {self.currently_chased_sheep.id:0{Sheep.sheep_id_len}d},"
                             f" 📐: {self.get_distance_to_sheep(self.currently_chased_sheep):.8f}]")
 
         return f"🐺✔️ [X: {self.x:+.5f}, Y: {self.y:+.5f}]{chased_sheep}"
