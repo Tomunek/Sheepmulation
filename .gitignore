@@ -5,3 +5,7 @@ __pycache__
 
 # Files
 .directory
+
+# Results
+pos.json
+alive.csv
