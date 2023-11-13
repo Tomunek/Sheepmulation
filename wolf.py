@@ -33,7 +33,12 @@ class Wolf:
                 self.currently_chased_sheep.alive = False
                 return self.currently_chased_sheep
             else:
-                # TODO: chase sheep (move towards it)
+                # Chase nearest sheep (move towards it)
+                dx = self.currently_chased_sheep.x - self.x
+                dy = self.currently_chased_sheep.y - self.y
+                distance_in_moves = self.get_distance_to_sheep(self.currently_chased_sheep) / Wolf.movement_distance
+                self.x += dx / distance_in_moves
+                self.y += dy / distance_in_moves
                 return None
         return None
 
