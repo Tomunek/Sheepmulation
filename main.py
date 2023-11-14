@@ -131,8 +131,6 @@ def process_program_arguments() -> None:
     Field.initial_sheep_count = sheep
     Field.wait_between_rounds = wait
 
-    pass
-
 
 def main():
     try:
