@@ -1,8 +1,12 @@
+#!/usr/bin/python3
 import argparse
+import configparser
 import logging
 import pathlib
 
 from field import Field
+from sheep import Sheep
+from wolf import Wolf
 
 WELCOME_STRING = r"""
  ____   _                                           _         _    _               
@@ -15,8 +19,26 @@ By Tomasz Kowalczyk & Jakub Kalinowski
 """
 
 
-def load_config_file(filename: str) -> None:
-    pass
+def load_config_file_and_apply(filename: str) -> None:
+    config_from_file = configparser.ConfigParser()
+    config_from_file.read(filename)
+    if "Sheep" in config_from_file:
+        if "InitPosLimit" in config_from_file["Sheep"]:
+            max_init_coord_from_file = float(config_from_file["Sheep"]["InitPosLimit"])
+            if max_init_coord_from_file <= 0.0:
+                raise ValueError
+            Sheep.max_init_coord = max_init_coord_from_file
+        if "MoveDist" in config_from_file["Sheep"]:
+            movement_dist_from_file = float(config_from_file["Sheep"]["MoveDist"])
+            if movement_dist_from_file <= 0.0:
+                raise ValueError
+            Sheep.movement_distance = movement_dist_from_file
+    if "Wolf" in config_from_file:
+        if "MoveDist" in config_from_file["Wolf"]:
+            movement_dist_from_file = float(config_from_file["Wolf"]["MoveDist"])
+            if movement_dist_from_file <= 0.0:
+                raise ValueError
+            Wolf.movement_distance = movement_dist_from_file
 
 
 def process_program_arguments() -> None:
@@ -84,9 +106,7 @@ def process_program_arguments() -> None:
     if config_file_name is not None:
         if not pathlib.Path(config_file_name).is_file():
             raise ValueError
-        load_config_file(config_file_name)
-        # TODO: Load config file and apply data do model
-        pass
+        load_config_file_and_apply(config_file_name)
 
     # Appy arguments to model
     Field.max_round = rounds
