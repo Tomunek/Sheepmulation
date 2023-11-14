@@ -26,19 +26,25 @@ def load_config_file_and_apply(filename: str) -> None:
         if "InitPosLimit" in config_from_file["Sheep"]:
             max_init_coord_from_file = float(config_from_file["Sheep"]["InitPosLimit"])
             if max_init_coord_from_file <= 0.0:
+                logging.critical(f"Invalid max initial coord of sheep ({max_init_coord_from_file}) in config file")
                 raise ValueError
             Sheep.max_init_coord = max_init_coord_from_file
+            logging.debug(f"Loaded max init sheep coord = {max_init_coord_from_file} from config file")
         if "MoveDist" in config_from_file["Sheep"]:
             movement_dist_from_file = float(config_from_file["Sheep"]["MoveDist"])
             if movement_dist_from_file <= 0.0:
+                logging.critical(f"Invalid movement distance of sheep ({movement_dist_from_file}) in config file")
                 raise ValueError
             Sheep.movement_distance = movement_dist_from_file
+            logging.debug(f"Loaded sheep movement distance = {movement_dist_from_file} from config file")
     if "Wolf" in config_from_file:
         if "MoveDist" in config_from_file["Wolf"]:
             movement_dist_from_file = float(config_from_file["Wolf"]["MoveDist"])
             if movement_dist_from_file <= 0.0:
+                logging.critical(f"Invalid movement distance of wolf ({movement_dist_from_file}) in config file")
                 raise ValueError
             Wolf.movement_distance = movement_dist_from_file
+            logging.debug(f"Loaded wolf movement distance = {movement_dist_from_file} from config file")
 
 
 def process_program_arguments() -> None:
@@ -94,10 +100,12 @@ def process_program_arguments() -> None:
 
     rounds = vars(arguments)["rounds"]
     if rounds <= 0:
+        logging.critical(f"Invalid number of rounds ({rounds})")
         raise ValueError
 
     sheep = vars(arguments)["sheep"]
     if sheep <= 0:
+        logging.critical(f"Invalid number of sheep ({sheep})")
         raise ValueError
 
     wait = vars(arguments)["wait"]
@@ -105,8 +113,13 @@ def process_program_arguments() -> None:
     # Load config file
     if config_file_name is not None:
         if not pathlib.Path(config_file_name).is_file():
+            logging.critical(f"Selected config file ({config_file_name}) does not exist")
             raise ValueError
-        load_config_file_and_apply(config_file_name)
+        try:
+            load_config_file_and_apply(config_file_name)
+        except ValueError:
+            logging.critical(f"Invalid option value in config file (values should be floats)")
+            raise ValueError
 
     # Appy arguments to model
     Field.max_round = rounds
@@ -126,7 +139,6 @@ def main():
         print("Invalid argument type!")
         exit(1)
 
-    # TODO: add logging
     print(WELCOME_STRING)
     field = Field()
     # Start simulation

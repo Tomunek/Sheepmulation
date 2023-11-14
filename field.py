@@ -1,5 +1,6 @@
 import csv
 import json
+import logging
 import os
 from typing import List
 
@@ -27,15 +28,19 @@ class Field:
         Field.round_len = len(str(Field.max_round))
         for i in range(Field.initial_sheep_count):
             self.sheep.append(Sheep())
+        logging.info(f"Created and initialised {len(self.sheep)} sheep")
 
     def get_alive_sheep(self) -> int:
         return len([True for sheep in self.sheep if sheep.alive])
 
     def simulate_round(self) -> None:
         # Simulate one round of simulation: all sheep, then wolf
+        logging.info(f"Started round {self.rounds_simulated + 1}")
         for sheep in self.sheep:
             sheep.move()
+        logging.info(f"All {self.get_alive_sheep()} alive sheep moved")
         self.sheep_killed_this_round = self.wolf.move(self.sheep)
+        logging.info(f"Round {self.rounds_simulated + 1} ended with {self.get_alive_sheep()} sheep alive")
         self.rounds_simulated += 1
 
     def run_simulation(self) -> None:
@@ -55,8 +60,12 @@ class Field:
         # Display cause of ending simulation
         if self.get_alive_sheep() > 0:
             print(f"[🐑😀] SIMULATION ENDED AFTER {self.rounds_simulated} ROUNDS. SHEEP ALIVE: {self.get_alive_sheep()}")
+            logging.info(
+                f"Simulation ended with {self.get_alive_sheep()} sheep alive after {self.rounds_simulated} rounds - "
+                f"wolf ran out of time")
         else:
             print(f"[🐑☠️] SIMULATION ENDED AFTER {self.rounds_simulated} ROUNDS. ALL SHEEP WERE KILLED.")
+            logging.info(f"Simulation ended with no sheep alive after {self.rounds_simulated} rounds")
 
         # Save results to json file
         if self.save_json_state_to_file(Field.json_filename):
@@ -101,6 +110,7 @@ class Field:
                 f.write(json.dumps(self.json_state, indent=4))
         except OSError:
             return False
+        logging.debug("Saved data to pos.json")
         return True
 
     def save_csv_count_to_file(self, filename: str) -> bool:
@@ -113,4 +123,5 @@ class Field:
                     writer.writerow([i, count])
         except OSError:
             return False
+        logging.debug("Saved data to alive.csv")
         return True
