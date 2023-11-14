@@ -8,8 +8,6 @@ from field import Field
 from sheep import Sheep
 from wolf import Wolf
 
-ASCII_GREEN = ""
-
 WELCOME_STRING = r"""
  ____   _                                           _         _    _               
 / ___| | |__    ___   ___  _ __   _ __ ___   _   _ | |  __ _ | |_ (_)  ___   _ __  
@@ -126,7 +124,7 @@ def process_program_arguments() -> None:
             logging.critical(f"Invalid option value in config file (values should be floats)")
             raise ValueError
 
-    # Appy arguments to model
+    # Apply arguments to model
     Field.max_round = rounds
     Field.initial_sheep_count = sheep
     Field.wait_between_rounds = wait
