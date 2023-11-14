@@ -8,6 +8,8 @@ from field import Field
 from sheep import Sheep
 from wolf import Wolf
 
+ASCII_GREEN = ""
+
 WELCOME_STRING = r"""
  ____   _                                           _         _    _               
 / ___| | |__    ___   ___  _ __   _ __ ___   _   _ | |  __ _ | |_ (_)  ___   _ __  
@@ -117,6 +119,9 @@ def process_program_arguments() -> None:
             raise ValueError
         try:
             load_config_file_and_apply(config_file_name)
+        except OSError:
+            logging.critical(f"Something went wrong while reading from config file (OSError)")
+            raise ValueError
         except ValueError:
             logging.critical(f"Invalid option value in config file (values should be floats)")
             raise ValueError
@@ -139,7 +144,7 @@ def main():
         print("Invalid argument type!")
         exit(1)
 
-    print(WELCOME_STRING)
+    print("\033[0;32m" + WELCOME_STRING + "\033[0m")
     field = Field()
     # Start simulation
     field.run_simulation()
