@@ -19,8 +19,8 @@ class Wolf:
         chased_sheep = ""
         if self.currently_chased_sheep is not None:
             chased_sheep = (f" [➡️🐑: {self.currently_chased_sheep.id:0{Sheep.sheep_id_len}d},"
-                            f" 📐: {self.get_distance_to_sheep(self.currently_chased_sheep):.8f}]")
-        return f"🐺✔️ [X: {self.x:+.5f}, Y: {self.y:+.5f}]{chased_sheep}"
+                            f" 📐: {self.get_distance_to_sheep(self.currently_chased_sheep):.5f}]")
+        return f"🐺✔️ [X: {self.x:+.3f}, Y: {self.y:+.3f}]{chased_sheep}"
 
     def move(self, sheep_list: List[Sheep]) -> None | Sheep:
         # Only move if there are sheep to chase, else rest

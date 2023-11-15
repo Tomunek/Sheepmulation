@@ -24,7 +24,7 @@ class Sheep:
         ok = "☠️"
         if self.alive:
             ok = "✔️"
-        return f"🐑{ok} [ID: {self.id:0{Sheep.sheep_id_len}d}] [X: {self.x:+.5f}, Y: {self.y:+.5f}]"
+        return f"🐑{ok} [ID: {self.id:0{Sheep.sheep_id_len}d}] [X: {self.x:+.3f}, Y: {self.y:+.3f}]"
 
     def move(self) -> None:
         if self.alive:

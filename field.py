@@ -85,7 +85,7 @@ class Field:
         killed_sheep = ""
         if self.sheep_killed_this_round is not None:
             killed_sheep = f" [🐑☠️: {self.sheep_killed_this_round.id:0{Sheep.sheep_id_len}d}]"
-        return (f"[⏱: {self.rounds_simulated:0{Field.round_len}d}] [🐺 X: {self.wolf.x:+.5f}, Y: {self.wolf.y:+.5f}] "
+        return (f"[⏱: {self.rounds_simulated:0{Field.round_len}d}] [🐺 X: {self.wolf.x:+.3f}, Y: {self.wolf.y:+.3f}] "
                 f"[🐑✔️: {self.get_alive_sheep():0{Field.sheep_count_len}d}]{chased_sheep}{killed_sheep}")
 
     def save_field_state_to_json_state(self) -> None:
