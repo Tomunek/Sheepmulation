@@ -92,9 +92,14 @@ def process_program_arguments() -> None:
 
     log_level = vars(arguments)["log_level"]
     if log_level is not None:
-        logging.basicConfig(filename="chase.log", filemode="w", level=log_level,
-                            format='[%(asctime)s] [%(levelname)s] %(message)s',
-                            datefmt='%Y/%m/%d %H:%M:%S')
+        try:
+            logging.basicConfig(filename="chase.log", filemode="w", level=log_level,
+                                format='[%(asctime)s] [%(levelname)s] %(message)s',
+                                datefmt='%Y/%m/%d %H:%M:%S')
+        except ValueError:
+            print("Invalid logging level selected! No logs will be generated.")
+            print("Available logging levels: DEBUG, INFO, WARNING, ERROR, CRITICAL")
+            raise ValueError
     else:
         logging.disable()
 
