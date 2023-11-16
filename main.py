@@ -120,6 +120,9 @@ def process_program_arguments() -> None:
         except OSError:
             logging.critical(f"Something went wrong while reading from config file (OSError)")
             raise ValueError
+        except configparser.Error:
+            logging.critical(f"Invalid config file format (can not parse)")
+            raise ValueError
         except ValueError:
             logging.critical(f"Invalid option value in config file (values should be floats)")
             raise ValueError
@@ -134,10 +137,10 @@ def main():
     try:
         process_program_arguments()
     except ValueError:
-        print("Invalid argument value!")
+        print("Invalid argument value! (enable logging and see chase.log)")
         exit(1)
     except TypeError:
-        print("Invalid argument type!")
+        print("Invalid argument type! (enable logging and see chase.log)")
         exit(1)
 
     print("\033[0;32m" + WELCOME_STRING + "\033[0m")
