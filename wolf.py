@@ -24,7 +24,7 @@ class Wolf:
 
     def move(self, sheep_list: List[Sheep]) -> None | Sheep:
         # Only move if there are sheep to chase, else rest
-        if any([sheep.alive for sheep in sheep_list]):
+        if any(sheep.alive for sheep in sheep_list):
             self.currently_chased_sheep = self.find_closest_sheep(sheep_list)
             distance_to_closest_sheep = self.get_distance_to_sheep(self.currently_chased_sheep)
             logging.debug(
@@ -55,6 +55,7 @@ class Wolf:
     def get_distance_to_sheep(self, sheep: Sheep) -> float:
         return math.sqrt(pow(self.x - sheep.x, 2) + pow(self.y - sheep.y, 2))
 
+    # TODO: faster distance function
     def find_closest_sheep(self, sheep_list: List[Sheep]) -> Sheep:
         # This method must not be called when there are no alive sheep
         closest_sheep = sheep_list[0]

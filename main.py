@@ -140,6 +140,7 @@ def process_program_arguments() -> None:
 
 def main():
     try:
+        # TODO: better exception handling, more informative error messages
         process_program_arguments()
     except ValueError:
         print("Invalid argument value! (enable logging and see chase.log)")

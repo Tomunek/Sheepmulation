@@ -8,6 +8,7 @@ from wolf import Wolf
 
 
 class Field:
+    # TODO: move those into __init__
     initial_sheep_count = 15
     sheep_count_len = 2
     max_round = 50
@@ -78,6 +79,7 @@ class Field:
         else:
             print("[✒️❌] COULD NOT SAVE RESULTS TO CSV!")
 
+    # TODO: move __str__ under __init__
     def __str__(self) -> str:
         chased_sheep = ""
         if self.wolf.currently_chased_sheep is not None:
@@ -102,6 +104,7 @@ class Field:
 
         self.json_state.append(field_state)
 
+    # TODO: better error handling
     def save_json_state_to_file(self, filename: str) -> bool:
         # Save json buffer to file, with nice formatting
         try:
