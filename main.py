@@ -3,6 +3,7 @@ import argparse
 import configparser
 import logging
 import pathlib
+import sys
 
 from field import Field
 from sheep import Sheep
@@ -19,36 +20,7 @@ By Tomasz Kowalczyk & Jakub Kalinowski
 """
 
 
-def load_config_file_and_apply(filename: str) -> None:
-    config_from_file = configparser.ConfigParser()
-    config_from_file.read(filename)
-    if "Sheep" in config_from_file:
-        if "InitPosLimit" in config_from_file["Sheep"]:
-            max_init_coord_from_file = float(config_from_file["Sheep"]["InitPosLimit"])
-            if max_init_coord_from_file <= 0.0:
-                logging.critical(f"Invalid max initial coord of sheep ({max_init_coord_from_file}) in config file")
-                raise ValueError
-            Sheep.max_init_coord = max_init_coord_from_file
-            logging.debug(f"Loaded max init sheep coord = {max_init_coord_from_file} from config file")
-        if "MoveDist" in config_from_file["Sheep"]:
-            movement_dist_from_file = float(config_from_file["Sheep"]["MoveDist"])
-            if movement_dist_from_file <= 0.0:
-                logging.critical(f"Invalid movement distance of sheep ({movement_dist_from_file}) in config file")
-                raise ValueError
-            Sheep.movement_distance = movement_dist_from_file
-            logging.debug(f"Loaded sheep movement distance = {movement_dist_from_file} from config file")
-    if "Wolf" in config_from_file:
-        if "MoveDist" in config_from_file["Wolf"]:
-            movement_dist_from_file = float(config_from_file["Wolf"]["MoveDist"])
-            if movement_dist_from_file <= 0.0:
-                logging.critical(f"Invalid movement distance of wolf ({movement_dist_from_file}) in config file")
-                raise ValueError
-            Wolf.movement_distance = movement_dist_from_file
-            logging.debug(f"Loaded wolf movement distance = {movement_dist_from_file} from config file")
-
-
-def process_program_arguments() -> None:
-    # Prepare parser
+def prepare_argument_parser() -> argparse.ArgumentParser:
     argument_parser = argparse.ArgumentParser(
         prog="Sheepmulation",
         description="Simulate wolf hunting a herd of sheep",
@@ -83,74 +55,109 @@ def process_program_arguments() -> None:
                                  action="store_true",
                                  dest="wait",
                                  default=False)
+    return argument_parser
 
-    # Get arguments
-    arguments = argument_parser.parse_args()
 
-    # Additional argument validation
-    config_file_name = vars(arguments)["config_file"]
-
-    log_level = vars(arguments)["log_level"]
-    if log_level is not None:
+def load_sheep_config_file_and_apply(config_from_file: configparser.ConfigParser) -> None:
+    if "InitPosLimit" in config_from_file["Sheep"]:
         try:
-            logging.basicConfig(filename="chase.log", filemode="w", level=log_level,
-                                format='[%(asctime)s] [%(levelname)s] %(message)s',
-                                datefmt='%Y/%m/%d %H:%M:%S')
-        except ValueError:
-            print("Invalid logging level selected! No logs will be generated.")
-            print("Available logging levels: DEBUG, INFO, WARNING, ERROR, CRITICAL")
-            raise ValueError
-    else:
-        logging.disable()
+            max_init_coord_from_file = float(config_from_file["Sheep"]["InitPosLimit"])
+        except ValueError as e:
+            raise ValueError(f"config file: invalid InitPosLimit value in config file") from e
+        if max_init_coord_from_file <= 0.0:
+            raise ValueError(
+                f"config file: invalid max initial coord of sheep ({max_init_coord_from_file}) in config file")
+        Sheep.max_init_coord = max_init_coord_from_file
+        logging.debug(f"Loaded max init sheep coord = {max_init_coord_from_file} from config file")
+    if "MoveDist" in config_from_file["Sheep"]:
+        try:
+            movement_dist_from_file = float(config_from_file["Sheep"]["MoveDist"])
+        except ValueError as e:
+            raise ValueError(f"config file: invalid Sheep MoveDist value in config file") from e
+        if movement_dist_from_file <= 0.0:
+            raise ValueError(
+                f"config file: invalid movement distance of sheep ({movement_dist_from_file}) in config file")
+        Sheep.movement_distance = movement_dist_from_file
+        logging.debug(f"Loaded sheep movement distance = {movement_dist_from_file} from config file")
 
-    rounds = vars(arguments)["rounds"]
+
+def load_wolf_config_file_and_apply(config_from_file: configparser.ConfigParser) -> None:
+    if "MoveDist" in config_from_file["Wolf"]:
+        try:
+            movement_dist_from_file = float(config_from_file["Wolf"]["MoveDist"])
+        except ValueError as e:
+            raise ValueError(f"config file: invalid Wolf MoveDist value in config file") from e
+        if movement_dist_from_file <= 0.0:
+            raise ValueError(
+                f"config file: invalid movement distance of wolf ({movement_dist_from_file}) in config file")
+        Wolf.movement_distance = movement_dist_from_file
+        logging.debug(f"Loaded wolf movement distance = {movement_dist_from_file} from config file")
+
+
+def load_config_file_and_apply(filename: str) -> None:
+    try:
+        config_from_file = configparser.ConfigParser()
+        try:
+            config_from_file.read(filename)
+        except OSError as e:
+            raise ValueError(f"argument -c/--config: could not read from config file (OSError)") from e
+        if "Sheep" in config_from_file:
+            load_sheep_config_file_and_apply(config_from_file)
+        if "Wolf" in config_from_file:
+            load_wolf_config_file_and_apply(config_from_file)
+    except configparser.Error as e:
+        raise ValueError(f"argument -c/--config: invalid config file format") from e
+
+
+def validate_program_arguments(arguments: argparse.Namespace) -> argparse.Namespace:
+    # Additional argument validation
+    log_level = arguments.log_level
+    if log_level is not None and log_level not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+        raise ValueError(f"argument -l/--log: invalid value: {log_level}!")
+
+    rounds = arguments.rounds
     if rounds <= 0:
-        logging.critical(f"Invalid number of rounds ({rounds})")
-        raise ValueError
+        raise ValueError(f"argument -r/--rounds: invalid value: {rounds}!")
 
-    sheep = vars(arguments)["sheep"]
+    sheep = arguments.sheep
     if sheep <= 0:
-        logging.critical(f"Invalid number of sheep ({sheep})")
-        raise ValueError
-
-    wait = vars(arguments)["wait"]
+        raise ValueError(f"argument -s/--sheep: invalid value: {sheep}!")
 
     # Load config file
-    if config_file_name is not None:
-        if not pathlib.Path(config_file_name).is_file():
-            logging.critical(f"Selected config file ({config_file_name}) does not exist")
-            raise ValueError
-        try:
-            load_config_file_and_apply(config_file_name)
-        except OSError:
-            logging.critical(f"Something went wrong while reading from config file (OSError)")
-            raise ValueError
-        except configparser.Error:
-            logging.critical(f"Invalid config file format (can not parse)")
-            raise ValueError
-        except ValueError:
-            logging.critical(f"Invalid option value in config file (values should be floats)")
-            raise ValueError
+    config_file_name = arguments.config_file
+    if config_file_name is not None and not pathlib.Path(config_file_name).is_file():
+        raise ValueError(f"argument -c/--config: selected config file ({config_file_name}) does not exist")
 
-    # Apply arguments to model
-    Field.max_round = rounds
-    Field.initial_sheep_count = sheep
-    Field.wait_between_rounds = wait
+    return arguments
 
 
 def main():
-    try:
-        # TODO: better exception handling, more informative error messages
-        process_program_arguments()
-    except ValueError:
-        print("Invalid argument value! (enable logging and see chase.log)")
-        exit(1)
-    except TypeError:
-        print("Invalid argument type! (enable logging and see chase.log)")
-        exit(1)
+    argument_parser = prepare_argument_parser()
+
+    # Custom exception handler to display program usage with exception and hide call stack
+    def exception_handler(exception_type, exception, traceback):
+        argument_parser.print_usage()
+        print(f"{exception_type.__name__}: {exception}")
+
+    sys.excepthook = exception_handler
+
+    # Get and validate program arguments
+    args = validate_program_arguments(argument_parser.parse_args())
+
+    # Set logging level
+    if args.log_level is not None:
+        logging.basicConfig(filename="chase.log", filemode="w", level=args.log_level,
+                            format='[%(asctime)s] [%(levelname)s] %(message)s',
+                            datefmt='%Y/%m/%d %H:%M:%S')
+    else:
+        logging.disable()
+
+    # Load and apply config from file
+    if args.config_file is not None:
+        load_config_file_and_apply(args.config_file)
 
     print("\033[0;32m" + WELCOME_STRING + "\033[0m")
-    field = Field()
+    field = Field(args.sheep, args.rounds, args.wait)
     # Start simulation
     field.run_simulation()
 

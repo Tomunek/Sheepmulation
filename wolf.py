@@ -53,16 +53,15 @@ class Wolf:
         return None
 
     def get_distance_to_sheep(self, sheep: Sheep) -> float:
-        return math.sqrt(pow(self.x - sheep.x, 2) + pow(self.y - sheep.y, 2))
+        return math.sqrt((self.x - sheep.x) ** 2 + (self.y - sheep.y) ** 2)
 
-    # TODO: faster distance function
     def find_closest_sheep(self, sheep_list: List[Sheep]) -> Sheep:
         # This method must not be called when there are no alive sheep
         closest_sheep = sheep_list[0]
         closest_sheep_distance = float("inf")
         for sheep in sheep_list:
             if sheep.alive:
-                distance = self.get_distance_to_sheep(sheep)
+                distance = (self.x - sheep.x) ** 2 + (self.y - sheep.y) ** 2
                 if distance < closest_sheep_distance:
                     closest_sheep_distance = distance
                     closest_sheep = sheep

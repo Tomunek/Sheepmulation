@@ -8,27 +8,35 @@ from wolf import Wolf
 
 
 class Field:
-    # TODO: move those into __init__
-    initial_sheep_count = 15
-    sheep_count_len = 2
-    max_round = 50
-    round_len = 2
-    wait_between_rounds = False
     json_filename = "pos.json"
     csv_filename = "alive.csv"
 
-    def __init__(self):
+    def __init__(self, initial_sheep_count=15, max_round=50, wait_between_rounds=False):
+        self.initial_sheep_count = initial_sheep_count
+        self.max_round = max_round
+        self.wait_between_rounds = wait_between_rounds
+
         self.rounds_simulated = 0
         self.json_state: List[dict] = []
         self.csv_sheep_counts: list[int] = []
         self.sheep_killed_this_round: Sheep | None = None
         self.wolf = Wolf()
         self.sheep: List[Sheep] = []
-        Field.sheep_count_len = len(str(Field.initial_sheep_count))
-        Field.round_len = len(str(Field.max_round))
-        for i in range(Field.initial_sheep_count):
+        self.sheep_count_len = len(str(self.initial_sheep_count))
+        self.round_len = len(str(self.max_round))
+        for i in range(self.initial_sheep_count):
             self.sheep.append(Sheep())
         logging.info(f"Created and initialised {len(self.sheep)} sheep")
+
+    def __str__(self) -> str:
+        chased_sheep = ""
+        if self.wolf.currently_chased_sheep is not None:
+            chased_sheep = f" [➡️🐑: {self.wolf.currently_chased_sheep.id:0{Sheep.sheep_id_len}d}]"
+        killed_sheep = ""
+        if self.sheep_killed_this_round is not None:
+            killed_sheep = f" [🐑☠️: {self.sheep_killed_this_round.id:0{Sheep.sheep_id_len}d}]"
+        return (f"[⏱: {self.rounds_simulated:0{self.round_len}d}] [🐺 X: {self.wolf.x:+.3f}, Y: {self.wolf.y:+.3f}] "
+                f"[🐑✔️: {self.get_alive_sheep():0{self.sheep_count_len}d}]{chased_sheep}{killed_sheep}")
 
     def get_alive_sheep(self) -> int:
         return len([True for sheep in self.sheep if sheep.alive])
@@ -49,12 +57,12 @@ class Field:
         self.save_field_state_to_json_state()
         self.csv_sheep_counts.append(self.get_alive_sheep())
         # Simulate until wolf or all sheep die
-        while self.rounds_simulated < Field.max_round and self.get_alive_sheep() > 0:
+        while self.rounds_simulated < self.max_round and self.get_alive_sheep() > 0:
             self.simulate_round()
             print(self)
             self.save_field_state_to_json_state()
             self.csv_sheep_counts.append(self.get_alive_sheep())
-            if Field.wait_between_rounds:
+            if self.wait_between_rounds:
                 input("Press ENTER to continue...")
 
         # Display cause of ending simulation
@@ -79,17 +87,6 @@ class Field:
         else:
             print("[✒️❌] COULD NOT SAVE RESULTS TO CSV!")
 
-    # TODO: move __str__ under __init__
-    def __str__(self) -> str:
-        chased_sheep = ""
-        if self.wolf.currently_chased_sheep is not None:
-            chased_sheep = f" [➡️🐑: {self.wolf.currently_chased_sheep.id:0{Sheep.sheep_id_len}d}]"
-        killed_sheep = ""
-        if self.sheep_killed_this_round is not None:
-            killed_sheep = f" [🐑☠️: {self.sheep_killed_this_round.id:0{Sheep.sheep_id_len}d}]"
-        return (f"[⏱: {self.rounds_simulated:0{Field.round_len}d}] [🐺 X: {self.wolf.x:+.3f}, Y: {self.wolf.y:+.3f}] "
-                f"[🐑✔️: {self.get_alive_sheep():0{Field.sheep_count_len}d}]{chased_sheep}{killed_sheep}")
-
     def save_field_state_to_json_state(self) -> None:
         # Add current field state to json buffer
         sheep_position_list: list[tuple[float, float] | None] = [
@@ -104,7 +101,6 @@ class Field:
 
         self.json_state.append(field_state)
 
-    # TODO: better error handling
     def save_json_state_to_file(self, filename: str) -> bool:
         # Save json buffer to file, with nice formatting
         try:
